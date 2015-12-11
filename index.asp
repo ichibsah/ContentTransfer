@@ -30,13 +30,13 @@
 					<div class="control-group">
 						<label class="control-label">Source</label>
 						<div class="controls source">
-							<input type="text" placeholder="Element Name" value="stf_document">
+							<input type="text" placeholder="Element Name">
 						</div>
 					</div>
 					<div class="control-group">
 						<label class="control-label">Target</label>
 						<div class="controls target">
-							<input type="text" placeholder="Element Name" value="med_document">
+							<input type="text" placeholder="Element Name">
 						</div>
 					</div>
 					<div class="control-group">
