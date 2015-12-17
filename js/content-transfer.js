@@ -4,6 +4,7 @@ function ContentTransfer(RqlConnectorObj, ContentClassGuid) {
 	
 	this.TemplateActionDialog = '#template-action-dialog';
 	this.TemplateStatus = '#template-status';
+	this.TemplateStatusElement = '#template-status-element';
 	this.TemplateStatusRemove = '#template-status-remove';
 	
 	this.UpdateArea(this.TemplateActionDialog);
@@ -57,25 +58,35 @@ ContentTransfer.prototype.ReferenceArray = function(PageInstancesArray, SourceEl
 	var ThisClass = this;
 	
 	var PageObj = PageInstancesArray.shift();
-	if(PageObj)
-	{
-		var RqlXml = '<PAGE guid="' + PageObj.guid + '"><ELEMENTS action="load"/></PAGE>';
+	if(PageObj){
 		PageObj.count = PageInstancesArray.length;
+		
+		var RqlXml = '<PAGE guid="' + PageObj.guid + '"><ELEMENTS action="load"/></PAGE>';
 		
 		ThisClass.UpdateArea(ThisClass.TemplateStatus, undefined, PageObj);
 
 		ThisClass.RqlConnectorObj.SendRql(RqlXml, false, function(data){
 			var SourceElementValue = $(data).find('ELEMENT[eltname="' + SourceElementName + '"]').attr('value');
 			var TargetElementGuid = $(data).find('ELEMENT[eltname="' + TargetElementName + '"]').attr('guid');
+			var TargetElementValue = $(data).find('ELEMENT[eltname="' + TargetElementName + '"]').attr('value');
 			
-			RqlXml = '<ELT action="save" reddotcacheguid="" guid="' + TargetElementGuid + '" value="' + SourceElementValue + '"></ELT>'
+			PageObj.sourceelementname = SourceElementName;
+			PageObj.sourceelementvalue = SourceElementValue;
+			PageObj.targetelementname = TargetElementName;
+			PageObj.targetelementvalue = TargetElementValue;
+			
+			ThisClass.UpdateArea(ThisClass.TemplateStatusElement, '.' + PageObj.guid, PageObj);
+			
+			var NewTargetElementValue = SourceElementValue;
+			
+			RqlXml = '<ELT action="save" reddotcacheguid="" guid="' + TargetElementGuid + '" value="' + NewTargetElementValue + '"></ELT>'
 			
 			ThisClass.RqlConnectorObj.SendRql(RqlXml, false, function(data){
 				ThisClass.SubmitPage(PageObj.guid, function(){
 					ThisClass.ReleasePage(PageObj.guid);
 				});
 				
-				ThisClass.UpdateArea(ThisClass.TemplateStatusRemove, ' .' + PageObj.guid);
+				ThisClass.UpdateArea(ThisClass.TemplateStatusRemove, '.' + PageObj.guid);
 				
 				ThisClass.ReferenceArray(PageInstancesArray, SourceElementName, TargetElementName);
 			});
@@ -86,8 +97,7 @@ ContentTransfer.prototype.ReferenceArray = function(PageInstancesArray, SourceEl
 ContentTransfer.prototype.ReferencePage = function(PageObj, SourceElementName, TargetElementName, CallbackFunc) {
 	var ThisClass = this;
 	
-	if(PageObj)
-	{
+	if(PageObj){
 		var RqlXml = '<PAGE guid="' + PageObj.guid + '"><ELEMENTS action="load"/></PAGE>';
 		
 		ThisClass.UpdateArea(ThisClass.TemplateStatus, undefined, PageObj);
@@ -95,11 +105,21 @@ ContentTransfer.prototype.ReferencePage = function(PageObj, SourceElementName, T
 		ThisClass.RqlConnectorObj.SendRql(RqlXml, false, function(data){
 			var SourceElementValue = $(data).find('ELEMENT[eltname="' + SourceElementName + '"]').attr('value');
 			var TargetElementGuid = $(data).find('ELEMENT[eltname="' + TargetElementName + '"]').attr('guid');
+			var TargetElementValue = $(data).find('ELEMENT[eltname="' + TargetElementName + '"]').attr('value');
 			
-			RqlXml = '<ELT action="save" reddotcacheguid="" guid="' + TargetElementGuid + '" value="' + SourceElementValue + '"></ELT>'
+			PageObj.sourceelementname = SourceElementName;
+			PageObj.sourceelementvalue = SourceElementValue;
+			PageObj.targetelementname = TargetElementName;
+			PageObj.targetelementvalue = TargetElementValue;
+			
+			ThisClass.UpdateArea(ThisClass.TemplateStatusElement, '.' + PageObj.guid, PageObj);
+			
+			var NewTargetElementValue = SourceElementValue;
+			
+			RqlXml = '<ELT action="save" reddotcacheguid="" guid="' + TargetElementGuid + '" value="' + NewTargetElementValue + '"></ELT>'
 			
 			ThisClass.RqlConnectorObj.SendRql(RqlXml, false, function(data){
-				ThisClass.UpdateArea(ThisClass.TemplateStatusRemove, ' .' + PageObj.guid);
+				ThisClass.UpdateArea(ThisClass.TemplateStatusRemove, '.' + PageObj.guid);
 				
 				if(CallbackFunc){
 					CallbackFunc();
@@ -134,7 +154,7 @@ ContentTransfer.prototype.ReleasePage = function(PageGuid, CallbackFunc) {
 ContentTransfer.prototype.UpdateArea = function(TemplateId, DataContainerAdditional, Data){
 	var ContainerId = $(TemplateId).attr('data-container');
 	if(DataContainerAdditional){
-		ContainerId += DataContainerAdditional;
+		ContainerId = DataContainerAdditional + ' ' + ContainerId;
 	}
 	var TemplateAction = $(TemplateId).attr('data-action');
 	var Template = Handlebars.compile($(TemplateId).html());

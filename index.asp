@@ -13,6 +13,11 @@
 		body {
 			padding: 10px;
 		}
+		
+		.element .separator {
+			padding-left: 5px;
+			padding-right: 5px;
+		}
 	</style>
 	<script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
 	<script type="text/javascript" src="js/bootstrap.min.js"></script>
@@ -57,12 +62,20 @@
 	<script id="template-status" type="text/x-handlebars-template" data-container="#status" data-action="append">
 		<div class="{{guid}}">
 			<div class="alert">
-				Processing <strong>{{name}}</strong>
 				{{#if count}}
 				<div class="pull-right">{{count}} remaining</div>
 				{{/if}}
+				<div>Processing</div>
+				<div><strong>{{name}}</strong></div>
+				<div class="element"></div>
 			</div>
 		</div>
+	</script>
+	
+	<script id="template-status-element" type="text/x-handlebars-template" data-container=".element" data-action="append">
+		<span class="label label-info">{{sourceelementname}}</span><span> {{sourceelementvalue}}</span>
+		<span class="badge badge-success separator"><i class="icon-circle-arrow-right icon-white"></i></span>
+		<span class="label label-info">{{targetelementname}}</span><span> {{targetelementvalue}}</span>
 	</script>
 	
 	<script id="template-status-remove" type="text/x-handlebars-template" data-container="#status" data-action="replace">
