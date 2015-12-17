@@ -71,6 +71,10 @@ ContentTransfer.prototype.ReferenceArray = function(PageInstancesArray, SourceEl
 			RqlXml = '<ELT action="save" reddotcacheguid="" guid="' + TargetElementGuid + '" value="' + SourceElementValue + '"></ELT>'
 			
 			ThisClass.RqlConnectorObj.SendRql(RqlXml, false, function(data){
+				ThisClass.SubmitPage(PageObj.guid, function(){
+					ThisClass.ReleasePage(PageObj.guid);
+				});
+				
 				ThisClass.UpdateArea(ThisClass.TemplateStatusRemove, ' .' + PageObj.guid);
 				
 				ThisClass.ReferenceArray(PageInstancesArray, SourceElementName, TargetElementName);
@@ -103,6 +107,28 @@ ContentTransfer.prototype.ReferencePage = function(PageObj, SourceElementName, T
 			});
 		});
 	}
+}
+
+ContentTransfer.prototype.SubmitPage = function(PageGuid, CallbackFunc) {
+	var RqlXml = '<PAGE action="save" guid="' + PageGuid + '" globalsave="1" actionflag="32768"/>';
+
+	this.RqlConnectorObj.SendRql(RqlXml, false, function(data){
+
+		if(CallbackFunc){
+			CallbackFunc();
+		}
+	});
+}
+
+ContentTransfer.prototype.ReleasePage = function(PageGuid, CallbackFunc) {
+	var RqlXml = '<PAGE action="save" guid="' + PageGuid + '" globalrelease="1" actionflag="4096"/>';
+	
+	this.RqlConnectorObj.SendRql(RqlXml, false, function(data){
+
+		if(CallbackFunc){
+			CallbackFunc();
+		}
+	});
 }
 
 ContentTransfer.prototype.UpdateArea = function(TemplateId, DataContainerAdditional, Data){
